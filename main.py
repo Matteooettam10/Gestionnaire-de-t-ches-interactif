@@ -1,46 +1,40 @@
 import json, requests
 
-# Définition d'une classe pour représenter une tâche
 class Task:
     def __init__(self, description):
         self.description = description
         self.completed = False
 
-# Définition d'une liste pour stocker les tâches
 task_list = []
 
-# Fonction pour ajouter une tâche
 def add_task():
     description = input("Entrez une description de la tâche : ")
     task = Task(description)
     task_list.append(task)
-    save_tasks()  # Enregistrer les tâches dans le fichier JSON
+    save_tasks()
     print("Tâche ajoutée avec succès !")
 
-# Fonction pour marquer une tâche comme terminée
 def complete_task():
     index = int(input("Entrez l'index de la tâche à marquer comme terminée : "))
     if index >= 0 and index < len(task_list):
         task = task_list[index]
         task.completed = True
-        save_tasks()  # Enregistrer les tâches dans le fichier JSON
+        save_tasks()
         print("Tâche marquée comme terminée !")
     else:
         print("Index invalide.")
 
-# Fonction pour supprimer une tâche
 def delete_task():
     index = int(input("Entrez l'index de la tâche à supprimer : "))
     if index >= 0 and index < len(task_list):
         del task_list[index]
-        save_tasks()  # Enregistrer les tâches dans le fichier JSON
+        save_tasks()
         print("Tâche supprimée avec succès !")
     else:
         print("Index invalide.")
 
-# Fonction pour afficher la liste complète des tâches à partir du fichier JSON
 def display_tasks():
-    load_tasks()  # Charger les tâches à partir du fichier JSON
+    load_tasks() 
     if len(task_list) == 0:
         print("Aucune tâche.")
     else:
@@ -48,7 +42,6 @@ def display_tasks():
             status = "Terminée" if task.completed else "En cours"
             print(f"{i}. {task.description} ({status})")
 
-# Fonction pour enregistrer les tâches dans un fichier JSON
 def save_tasks():
     with open('taches.json', 'w') as file:
         task_data = []
@@ -60,7 +53,6 @@ def save_tasks():
         json.dump(task_data, file)
         print("Tâches sauvegardées avec succès !")
 
-# Fonction pour charger les tâches à partir d'un fichier JSON
 def load_tasks():
     try:
         with open('taches.json', 'r') as file:
@@ -74,7 +66,6 @@ def load_tasks():
     except FileNotFoundError:
         print("Aucun fichier de tâches trouvé. Commencez par en ajouter !")
 
-# Boucle principale du programme
 while True:
     print("\nQue voulez-vous faire ?")
     print("1. Ajouter une tâche")

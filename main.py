@@ -1,4 +1,5 @@
 import json
+import os
 
 def load_language():
     try:
@@ -13,10 +14,25 @@ def save_language(language):
         language_data = {'language': language}
         json.dump(language_data, file)
 
+def check_new_languages():
+    language_dir = 'language'
+    if not os.path.exists(language_dir):
+        os.makedirs(language_dir)
+
+    files = os.listdir(language_dir)
+    languages = [file.split('.')[0] for file in files if file.endswith('.json')]
+
+    existing_language = load_language()
+
+    if existing_language not in languages:
+        print("New languages found: ", languages)
+        print("To apply a new language, please rerun the script.")
+        exit()
+
 def choose_language():
     while True:
-        language = input("Choose the script language (fr/en): ")
-        if language == "fr" or language == "en":
+        language = input("Choose the script language (fr/it/en/es/de/ja/po/zh): ")
+        if language == "fr" or language == "en" or language == "it" or language == "es" or language == "de" or language == "ja" or language == "po" or language == "zh":
             save_language(language)
             break
         else:
@@ -27,17 +43,20 @@ language = load_language()
 if language is None:
     choose_language()
 
+check_new_languages()
+
 def load_translations():
     try:
-        with open(f'{language}.json', 'r') as file:
+        with open(f'language/{language}.json', 'r', encoding='utf-8') as file:
             return json.load(file)
+
     except FileNotFoundError:
         return None
 
 translations = load_translations()
 
 if translations is None:
-    print(f"To apply the language, you need to rerun the script.")
+    print("To apply the language, you need to rerun the script.")
     exit()
 
 def translate(key):
@@ -115,7 +134,7 @@ def load_tasks():
 def change_language():
     while True:
         new_language = input(translate('change_languageO'))
-        if new_language == "fr" or new_language == "en":
+        if new_language == "fr" or new_language == "en" or new_language == "it" or new_language == "es" or new_language == "de" or new_language == "ja" or new_language == "po" or new_language == "zh":
             save_language(new_language)
             print(translate('language_changed'))
             print(translate('valid_lg'))
